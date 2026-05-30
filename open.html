@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEMPTASION Open View</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header>
+    <h1>TEMPTASION — OPEN VIEW</h1>
+    <div class="status-chip" id="showStatus">LOADING...</div>
+  </header>
+
+  <main>
+    <div class="hold-bar" id="holdBar" style="display:none;"></div>
+
+    <div class="top-stats">
+      <div class="stat-card">
+        <h3>SCHEDULE STATUS</h3>
+        <div class="value" id="scheduleStatus">-</div>
+      </div>
+      <div class="stat-card">
+        <h3>PROJECTED END</h3>
+        <div class="value" id="projectedEnd">-</div>
+      </div>
+      <div class="stat-card">
+        <h3>CURRENT TIME</h3>
+        <div class="value" id="currentTime">-</div>
+      </div>
+    </div>
+
+    <div class="grid-two">
+      <section class="panel">
+        <h2>Upcoming</h2>
+        <div class="list" id="upcomingList"></div>
+      </section>
+
+      <section>
+        <div class="card-large">
+          <h3>ON STAGE (NOW)</h3>
+          <div class="title" id="liveTitle">-</div>
+          <div class="performers" id="livePerformers">-</div>
+          <div class="captains-line" id="liveCaptains"></div>
+        </div>
+
+        <div class="card-large">
+          <h3>BACKSTAGE (NEXT)</h3>
+          <div class="title" id="backstageTitle">-</div>
+          <div class="performers" id="backstagePerformers">-</div>
+          <div class="captains-line" id="backstageCaptains"></div>
+          <div class="timer" id="backstageTimer">GO TO STAGE IN: -</div>
+        </div>
+
+        <div class="card-large">
+          <h3>ON DECK</h3>
+          <div class="title" id="blueTitle">-</div>
+          <div class="performers" id="bluePerformers">-</div>
+          <div class="captains-line" id="blueCaptains"></div>
+          <div class="timer" id="blueTimer">GET READY IN: -</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="banner">IF YOU ARE ON DECK, YOU MUST BE READY TO WALK.</div>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
