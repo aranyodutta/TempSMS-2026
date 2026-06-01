@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stage Management System — Operator</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="operator shell" data-theme="dark">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-dot">SM</div>
+      <div>
+        <div class="brand-title">Stage Ops</div>
+        <div class="brand-subtitle">Production console</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Operator navigation">
+      <a class="active" href="./operator.html"><span>Operator</span></a>
+      <a href="./open.html"><span>Performer</span></a>
+      <a href="./confidence.html"><span>Confidence Monitor</span></a>
+      <a href="#run-of-show" data-side-tab="run"><span>Run of Show</span></a>
+      <a href="#reports"><span>Reports</span></a>
+      <a href="#settings"><span>Settings</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="small">Firestore</div>
+      <div class="sidebar-path">/shows/main</div>
+    </div>
+  </aside>
+
+  <div class="shell-main">
+    <header class="app-header">
+      <div>
+        <div class="eyebrow">Operations Desk</div>
+        <h1>Stage Management System &mdash; Operator</h1>
+      </div>
+      <div class="header-right">
+        <div class="status-chip" id="operatorHeaderStatus">LOADING...</div>
+        <button class="theme-toggle secondary" id="themeToggleBtn" type="button">Light</button>
+        <img class="sm-brand" src="https://i.ibb.co/TDmLcFTj/SMALL-sm-logo-main-2-1.png" alt="Stratford Meridian" />
+      </div>
+    </header>
+
+    <nav class="tabs op-tabs" aria-label="Operator sections">
+      <button class="tab active" type="button" data-tab="live">Live Control</button>
+      <button class="tab" type="button" data-tab="setup">Show Setup</button>
+      <button class="tab" type="button" data-tab="timing">Timing Settings</button>
+      <button class="tab" type="button" data-tab="system">System</button>
+    </nav>
+
+    <main class="workspace">
+      <section class="tab-page active" data-tab-panel="live">
+        <div class="top-stats kpi-row">
+          <div class="stat-card">
+            <h3>Current Time</h3>
+            <div class="value" id="operatorTime">-</div>
+            <div class="stat-note">Local clock</div>
+          </div>
+          <div class="stat-card">
+            <h3>Projected End</h3>
+            <div class="value" id="operatorProjectedEnd">-</div>
+            <div class="stat-note">Live estimate</div>
+          </div>
+          <div class="stat-card">
+            <h3>Offset</h3>
+            <div class="value" id="operatorOffset">-</div>
+            <div class="stat-note">Against baseline</div>
+          </div>
+          <div class="stat-card">
+            <h3>Show Status</h3>
+            <div class="value" id="operatorShowStatus">-</div>
+            <div class="stat-note">Firestore synced</div>
+          </div>
+        </div>
+
+        <div class="operator-live-grid">
+          <section class="panel now-panel">
+            <div class="panel-head">
+              <div>
+                <div class="eyebrow">Live item</div>
+                <h2>Now Running</h2>
+              </div>
+              <div class="meta status-indicator" id="currentStatus">-</div>
+            </div>
+            <div class="hero-title" id="currentTitle">-</div>
+            <div class="hero-meta" id="currentType">-</div>
+            <div class="metric-grid">
+              <div><span>Planned</span><strong id="currentPlanned">-</strong></div>
+              <div><span>Elapsed</span><strong id="currentElapsed">-</strong></div>
+              <div><span>Over / Under</span><strong id="currentOverUnder">-</strong></div>
+            </div>
+          </section>
+
+          <section class="panel queue-panel">
+            <div class="panel-head">
+              <h2>Next Up</h2>
+              <span class="chip">Queue</span>
+            </div>
+            <div class="queue-stack">
+              <div class="queue-card">
+                <span>Backstage</span>
+                <strong id="backstageTitle">-</strong>
+                <em id="backstagePlanned">-</em>
+              </div>
+              <div class="queue-card accent">
+                <span>On Deck</span>
+                <strong id="blueTitle">-</strong>
+                <em id="bluePlanned">-</em>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel controls-panel">
+            <div class="panel-head">
+              <h2>Show Controls</h2>
+              <span class="subnote">Armed actions</span>
+            </div>
+            <div class="controls">
+              <button id="startBtn">Start Item</button>
+              <button id="endBtn" class="danger">End Item</button>
+              <button id="undoBtn" class="secondary">Undo Last Action</button>
+              <button id="holdBtn" class="warn">Toggle Hold</button>
+              <button id="initBtn" class="danger">Init Show / Reset</button>
+            </div>
+          </section>
+
+          <section class="panel decision-panel">
+            <div class="panel-head">
+              <h2>Intermission Decision</h2>
+              <div class="decision-status unlocked" id="lockStatus">UNLOCKED</div>
+            </div>
+            <div class="decision-current">
+              <div class="small">CURRENT PLAN</div>
+              <div id="planLabel">WITH INTERMISSION</div>
+            </div>
+            <div class="recommendation ok" id="recommendation">INTERMISSION OK</div>
+            <div class="decision-actions">
+              <button id="keepIntermissionBtn">Keep Intermission</button>
+              <button id="skipIntermissionBtn" class="secondary">Skip Intermission</button>
+            </div>
+          </section>
+
+          <section class="panel people-panel">
+            <div class="panel-head"><h2>People</h2></div>
+            <div class="list compact">
+              <div class="list-item"><div>Current</div><div class="meta" id="currentCaptains">-</div></div>
+              <div class="list-item"><div>Backstage</div><div class="meta" id="backstageCaptains">-</div></div>
+              <div class="list-item"><div>On Deck</div><div class="meta" id="deckCaptains">-</div></div>
+            </div>
+          </section>
+
+          <section class="panel stage-req">
+            <div class="panel-head">
+              <h2>Stage Requirements</h2>
+              <div class="small">Current setup and next changes</div>
+            </div>
+            <div class="req-grid">
+              <div class="req-card">
+                <div class="req-kicker">On Stage Now</div>
+                <div class="req-title" id="reqNowTitle">-</div>
+                <div class="req-rows">
+                  <div class="req-row"><div class="req-label">Mics</div><div class="req-value" id="reqNowMics">-</div></div>
+                  <div class="req-row"><div class="req-label">Chairs</div><div class="req-value" id="reqNowChairs">-</div></div>
+                  <div class="req-row"><div class="req-label">Instruments</div><div class="req-value" id="reqNowInstruments">-</div></div>
+                  <div class="req-row"><div class="req-label">Other</div><div class="req-value" id="reqNowOther">-</div></div>
+                </div>
+              </div>
+              <div class="req-card">
+                <div class="req-kicker">Backstage Next</div>
+                <div class="req-title" id="reqBackTitle">-</div>
+                <div class="req-rows">
+                  <div class="req-row"><div class="req-label">Mics</div><div class="req-value" id="reqBackMics">-</div></div>
+                  <div class="req-row"><div class="req-label">Chairs</div><div class="req-value" id="reqBackChairs">-</div></div>
+                  <div class="req-row"><div class="req-label">Instruments</div><div class="req-value" id="reqBackInstruments">-</div></div>
+                  <div class="req-row"><div class="req-label">Other</div><div class="req-value" id="reqBackOther">-</div></div>
+                </div>
+                <div class="req-change"><div class="req-change-title">Change: now to backstage</div><div id="reqBackChange" class="no-change">-</div></div>
+              </div>
+              <div class="req-card">
+                <div class="req-kicker">On Deck</div>
+                <div class="req-title" id="reqDeckTitle">-</div>
+                <div class="req-rows">
+                  <div class="req-row"><div class="req-label">Mics</div><div class="req-value" id="reqDeckMics">-</div></div>
+                  <div class="req-row"><div class="req-label">Chairs</div><div class="req-value" id="reqDeckChairs">-</div></div>
+                  <div class="req-row"><div class="req-label">Instruments</div><div class="req-value" id="reqDeckInstruments">-</div></div>
+                  <div class="req-row"><div class="req-label">Other</div><div class="req-value" id="reqDeckOther">-</div></div>
+                </div>
+                <div class="req-change"><div class="req-change-title">Change: backstage to on deck</div><div id="reqDeckChange" class="no-change">-</div></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel run-panel" id="run-preview">
+            <div class="panel-head">
+              <h2>Run of Show Preview</h2>
+              <label class="toggle"><input type="checkbox" id="advancedToggle" /> Advanced Controls</label>
+            </div>
+            <div class="table-wrap">
+              <table class="table" id="runTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Planned</th>
+                    <th>People</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th id="advancedHeader" style="display:none;">Advanced</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <footer class="status-strip">
+          <span>Operator console online</span>
+          <span id="footerStatus">Waiting for show state</span>
+          <span>Stage Management System</span>
+        </footer>
+      </section>
+
+      <section class="tab-page run-master-page" data-tab-panel="run" id="run-of-show">
+        <div class="run-hero">
+          <div>
+            <div class="eyebrow">Operational schedule</div>
+            <h2>Run of Show</h2>
+            <p>Master view of every runtime item, branch, timing result, person, and stage requirement.</p>
+          </div>
+          <div class="run-hero-actions">
+            <button id="rosJumpCurrentBtn" class="secondary" type="button">Jump to Current</button>
+            <button id="rosExportBtn" type="button">Export Current Run</button>
+          </div>
+        </div>
+
+        <div class="run-summary-row">
+          <div class="stat-card compact">
+            <h3>Active Plan</h3>
+            <div class="value small-value" id="rosActivePlan">-</div>
+            <div class="stat-note">Branch mode in effect</div>
+          </div>
+          <div class="stat-card compact">
+            <h3>Live Item</h3>
+            <div class="value small-value" id="rosLiveItem">-</div>
+            <div class="stat-note">Current stage focus</div>
+          </div>
+          <div class="stat-card compact">
+            <h3>Next / On Deck</h3>
+            <div class="value small-value" id="rosNextItem">-</div>
+            <div class="stat-note">Backstage and on deck queue</div>
+          </div>
+          <div class="stat-card compact">
+            <h3>Completed</h3>
+            <div class="value small-value" id="rosCompletedCount">-</div>
+            <div class="stat-note">Finished active-plan items</div>
+          </div>
+        </div>
+
+        <section class="panel run-command-panel">
+          <div class="table-toolbar run-toolbar">
+            <div>
+              <h2>Runtime Items</h2>
+              <div class="small" id="rosSummary">Waiting for runtime data.</div>
+            </div>
+            <div class="run-filter-grid">
+              <input id="rosSearchInput" type="search" placeholder="Search title, people, notes, requirements" />
+              <select id="rosStatusFilter" aria-label="Filter by status">
+                <option value="">All statuses</option>
+                <option value="live">Live</option>
+                <option value="backstage">Backstage</option>
+                <option value="blue">On deck</option>
+                <option value="queued">Queued</option>
+                <option value="done">Done</option>
+              </select>
+              <select id="rosTypeFilter" aria-label="Filter by type">
+                <option value="">All types</option>
+              </select>
+              <select id="rosBranchFilter" aria-label="Filter by branch or plan">
+                <option value="active">Active Plan Only</option>
+                <option value="all">All Branches</option>
+                <option value="core">Core Only</option>
+                <option value="withIntermission">With Intermission</option>
+                <option value="skipIntermission">Skip Intermission</option>
+                <option value="linear">Linear</option>
+              </select>
+              <label class="toggle run-toggle"><input type="checkbox" id="rosShowCompletedToggle" checked /> Show completed</label>
+            </div>
+          </div>
+
+          <div class="table-wrap run-master-wrap">
+            <table class="table run-master-table" id="runOfShowTable">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Title</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Branch</th>
+                  <th>Planned Time</th>
+                  <th>Actual Start</th>
+                  <th>Actual End</th>
+                  <th>Elapsed</th>
+                  <th>Variance</th>
+                  <th>People</th>
+                  <th>Mics</th>
+                  <th>Chairs</th>
+                  <th>Instruments</th>
+                  <th>Other</th>
+                  <th>Change Notes</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="pagination-strip">
+            <span id="rosCountLabel">Showing 0 runtime items</span>
+            <span class="small">Live Start / End actions update this table automatically.</span>
+          </div>
+        </section>
+      </section>
+
+      <section class="tab-page setup-page" data-tab-panel="setup">
+        <div class="setup-hero">
+          <div>
+            <div class="eyebrow">Pre-show configuration</div>
+            <h2>Show Setup</h2>
+            <p>Build, import, validate, and save the run of show that will be used on the next reset.</p>
+          </div>
+          <div class="setup-actions">
+            <button id="loadSetupBtn" class="secondary" type="button">Load Current</button>
+            <button id="addSetupItemBtn" class="secondary" type="button">Add Item</button>
+            <button id="saveSetupBtn" type="button">Save Setup</button>
+          </div>
+        </div>
+
+        <div class="setup-meta-row">
+          <div class="panel">
+            <label class="field-label" for="setupTitleInput">Show Title / Display Name</label>
+            <input id="setupTitleInput" type="text" placeholder="Show title" />
+          </div>
+          <div class="panel validation-card">
+            <div class="small">Validation Summary</div>
+            <div class="setup-status" id="setupStatus">Not saved in this session.</div>
+          </div>
+          <div class="panel validation-card">
+            <div class="small">Setup Source</div>
+            <div class="setup-status" id="setupSourceLabel">Loading</div>
+          </div>
+        </div>
+
+        <section class="panel import-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Excel Import</h2>
+              <div class="small">Accepted columns: Order, Title, Type, Planned, People, Mics, Chairs, Instruments, Other, Notes, Branch, Change Notes.</div>
+            </div>
+            <div class="import-actions">
+              <input id="excelImportInput" type="file" accept=".xlsx,.xls" />
+              <button id="previewImportBtn" class="secondary" type="button">Preview Import</button>
+              <button id="applyImportBtn" type="button" disabled>Replace Setup</button>
+            </div>
+          </div>
+          <div class="alert" id="importStatus">No import loaded.</div>
+          <div class="import-preview" id="importPreview"></div>
+        </section>
+
+        <section class="panel setup-panel">
+          <div class="table-toolbar">
+            <div>
+              <h2>Run of Show Builder</h2>
+              <div class="small">Status is controlled by live operations, not setup.</div>
+            </div>
+            <div class="toolbar-controls">
+              <input id="setupSearchInput" type="search" placeholder="Search setup" />
+              <select id="setupBranchFilter">
+                <option value="">All branches</option>
+                <option value="core">Core / Linear</option>
+                <option value="withIntermission">With Intermission</option>
+                <option value="skipIntermission">Skip Intermission</option>
+                <option value="custom">Custom / Inactive</option>
+              </select>
+              <button id="addSetupItemBtn2" class="secondary" type="button">Add Row</button>
+            </div>
+          </div>
+
+          <datalist id="setupTypeOptions">
+            <option value="DANCE"></option>
+            <option value="ACTING"></option>
+            <option value="SINGING"></option>
+            <option value="EMCEE"></option>
+            <option value="MC"></option>
+            <option value="INTERMISSION"></option>
+            <option value="CONCLUSION"></option>
+            <option value="SETUP"></option>
+            <option value="OTHER"></option>
+          </datalist>
+
+          <div class="setup-table-wrap">
+            <table class="table setup-table" id="setupTable">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Title</th>
+                  <th>Type</th>
+                  <th>Planned</th>
+                  <th>People / Performers</th>
+                  <th>Stage Requirements</th>
+                  <th>Branch</th>
+                  <th>Change Notes</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="pagination-strip">
+            <span id="setupPaginationLabel">Showing all setup rows</span>
+            <div><button class="secondary" type="button" disabled>Previous</button><button class="secondary" type="button" disabled>Next</button></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="tab-page" data-tab-panel="timing">
+        <section class="panel settings-panel" id="settings">
+          <div class="panel-head"><h2>Timing Settings</h2><span class="chip">Saved to Firestore</span></div>
+          <div class="settings-layout">
+            <div>
+              <label class="field-label" for="actualShowStartInput">Actual Show Start</label>
+              <input id="actualShowStartInput" type="time" />
+            </div>
+            <div>
+              <label class="field-label" for="targetRuntimeHoursInput">Target Hours</label>
+              <input id="targetRuntimeHoursInput" type="number" min="0" step="1" />
+            </div>
+            <div>
+              <label class="field-label" for="targetRuntimeMinutesInput">Target Minutes</label>
+              <input id="targetRuntimeMinutesInput" type="number" min="0" max="59" step="1" />
+            </div>
+            <div>
+              <label class="field-label" for="safetyBufferInput">Safety Buffer Minutes</label>
+              <input id="safetyBufferInput" type="number" min="0" step="1" value="3" />
+            </div>
+          </div>
+          <button id="saveSettingsBtn" class="secondary settings-save">Save Settings</button>
+        </section>
+      </section>
+
+      <section class="tab-page" data-tab-panel="system">
+        <section class="panel system-panel">
+          <div class="panel-head"><h2>System</h2><span class="chip">Operational</span></div>
+          <div class="system-grid">
+            <div class="list-item"><div>Firestore Path</div><div class="meta">/shows/main</div></div>
+            <div class="list-item"><div>Live Items</div><div class="meta">/shows/main/items</div></div>
+            <div class="list-item"><div>Setup Storage</div><div class="meta">/shows/main.setupItems</div></div>
+            <div class="list-item"><div>Theme Storage</div><div class="meta">localStorage</div></div>
+          </div>
+        </section>
+        <section class="panel" id="reports">
+          <div class="panel-head"><h2>Reports</h2><span class="chip">Coming from live data</span></div>
+          <p class="muted-copy">Run history, offsets, and item timings remain available through the live item data in Firestore.</p>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
